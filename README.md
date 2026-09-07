@@ -1,11 +1,8 @@
-<<<<<<< HEAD
-# stack-algorithm-group04
-=======
-# Group 04 — Expression Processor
+# Group 04 - Expression Processor
 
 ## Overview
 
-โปรเจกต์นี้เป็นงานกลุ่มวิชา **CSD2103 การออกแบบและวิเคราะห์อัลกอริทึม**  
+โปรเจกต์นี้เป็นงานกลุ่มวิชา **CSD2103 การออกแบบและวิเคราะห์อัลกอริทึม**
 หัวข้อ **Expression Processor: Infix และ Postfix ด้วย Stack (Java)**
 
 ระบบรองรับการรับนิพจน์คณิตศาสตร์แบบ Infix ตรวจสอบความถูกต้อง แปลงเป็น Postfix และคำนวณผลลัพธ์
@@ -31,14 +28,15 @@
 
 ## Algorithms
 
-### Algorithm A — Infix to Postfix แล้ว Evaluate
+### Algorithm A - Infix to Postfix แล้ว Evaluate
 
 1. Tokenize นิพจน์
-2. แปลง Infix เป็น Postfix โดยใช้ Operator Stack และ Priority
-3. Evaluate Postfix โดยใช้ Operand Stack
-4. คืนผลลัพธ์หรือแจ้ง Error
+2. ตรวจสอบรูปแบบ Operand / Operator / Parentheses
+3. แปลง Infix เป็น Postfix โดยใช้ Operator Stack และ Priority
+4. Evaluate Postfix โดยใช้ Operand Stack
+5. คืนผลลัพธ์หรือแจ้ง Error
 
-### Algorithm B — Direct Infix Evaluation
+### Algorithm B - Direct Infix Evaluation
 
 ใช้ `Operand Stack` และ `Operator Stack` ประมวลผล Infix โดยตรง โดยไม่ต้องสร้าง Postfix ก่อน
 
@@ -64,24 +62,17 @@ Result:
 
 ## Complexity
 
-ทั้ง Algorithm A และ Algorithm B มี:
-
-```text
-Time Complexity: O(n)
-Space Complexity: O(n)
-```
-
-โดย `n` คือจำนวน Token ของนิพจน์
+ทั้ง Algorithm A และ Algorithm B มี Time Complexity และ Space Complexity เป็น `O(n)` เมื่อ `n` คือจำนวน Token ของนิพจน์
 
 ## Project Structure
 
 ```text
 src/
 ├── Main.java
-├── models/
+├── BenchmarkExperiment.java
 ├── algorithms/
-├── utils/
-└── experiments/
+├── models/
+└── utils/
 
 test/
 data/
@@ -93,42 +84,31 @@ report/
 
 ## Testing
 
-โปรเจกต์มี Test Cases สำหรับกรณีปกติ กรณีขอบเขต นิพจน์ว่าง Input ไม่ถูกต้อง วงเล็บไม่ครบ และการหารด้วยศูนย์
+โปรเจกต์มี Test Cases สำหรับกรณีปกติ กรณีขอบเขต นิพจน์ว่าง Input ไม่ถูกต้อง วงเล็บไม่ครบ และการหารด้วยศูนย์ รวมถึงการทดสอบทั้ง Algorithm A และ Algorithm B
 
 ## Performance Experiment
 
-ทดลองเปรียบเทียบ Algorithm A และ Algorithm B ที่ขนาดข้อมูล:
+ทดลองเปรียบเทียบ Algorithm A และ Algorithm B ที่ขนาดข้อมูล 100, 1,000, 10,000 และ 50,000 โดยแต่ละขนาดทดลอง 5 รอบและใช้ค่าเฉลี่ยในการเปรียบเทียบ
 
-```text
-100
-1,000
-10,000
-50,000
-```
-
-แต่ละขนาดทดลอง 5 รอบและใช้ค่าเฉลี่ยในการเปรียบเทียบ
-
-ผลการทดลองและกราฟอยู่ในโฟลเดอร์ `results/`
+ผลการทดลองอยู่ในโฟลเดอร์ `results/`
 
 ## How to Run
 
-Compile Source Code ด้วย Java แล้วรัน:
-
-```text
-Main
-```
+Compile Source Code ด้วย Java แล้วรัน `Main`
 
 จากนั้นเลือก:
 
 ```text
 1. Algorithm A (Infix -> Postfix -> Evaluate)
 2. Algorithm B (Direct Infix Evaluate)
+3. Trace Algorithm A
+4. Trace Algorithm B
+5. Run Mandatory Test Cases
 0. Exit
 ```
 
 ## Group
 
-Group 04 — Expression Processor
+Group 04 - Expression Processor
 
 วิชา CSD2103 การออกแบบและวิเคราะห์อัลกอริทึม
->>>>>>> 21deea3 (FN)
