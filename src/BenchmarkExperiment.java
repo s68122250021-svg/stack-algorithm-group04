@@ -14,7 +14,7 @@ public class BenchmarkExperiment {
 
         String lineSeparator = "+----------+-------------+-----------------+------------+------------+-------------+-----------------+------------+------------------+";
         String headerFormat  = "| %-8s | %-11s | %-15s | %-10s | %-10s | %-11s | %-15s | %-10s | %-16s |%n";
-        String rowFormat     = "| %-8d | %-11s | %,15d | %,10d | %,10d | %,11d | %,15d | %,10s | %,16.2f |%n";
+        String rowFormat     = "| %-8d | %-11s | %,15d | %,10d | %,10d | %,11d | %,15d | %,10d | %,16.2f |%n";
 
         System.out.println(lineSeparator);
         System.out.printf(headerFormat,
