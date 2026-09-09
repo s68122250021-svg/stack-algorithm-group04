@@ -6,8 +6,7 @@ import java.util.Random;
 public class BenchmarkExperiment {
 
     public static void main(String[] args) {
-        // เปลี่ยนเป็นเลขคี่เพื่อให้จำนวนนับ Token ของนิพจน์ถูกต้อง
-        int[] sizes = {101, 1001, 10001, 50001};
+        int[] operandSizes = {100, 1000, 10000, 50000};
         int runs = 5;
 
         AlgorithmA algoA = new AlgorithmA();
@@ -15,20 +14,19 @@ public class BenchmarkExperiment {
 
         String lineSeparator = "+----------+-------------+-----------------+------------+------------+-------------+-----------------+------------+------------------+";
         String headerFormat  = "| %-8s | %-11s | %-15s | %-10s | %-10s | %-11s | %-15s | %-10s | %-16s |%n";
-        String rowFormat     = "| %-8d | %-11s | %,15d | %,10d | %,10d | %,11d | %,15d | %,10d | %,16.2f |%n";
+        String rowFormat     = "| %-8d | %-11s | %,15d | %,10d | %,10d | %,11d | %,15d | %,10s | %,16.2f |%n";
 
         System.out.println(lineSeparator);
         System.out.printf(headerFormat,
-            "Size (n)", "Algorithm", "Avg Time (ns)", "Push", "Pop", "Comparisons", "Loop Iter", "Data Moved", "Est. Memory(KB)");
+            "n operands", "Algorithm", "Actual tokens", "Avg Time (ns)", "Push", "Pop", "Comparisons", "Loop Iter", "Est. Memory(KB)");
         System.out.println(lineSeparator);
 
-        for (int n : sizes) {
+        for (int n : operandSizes) {
             String expr = generateExpression(n);
+            int actualTokens = 2 * n - 1;
 
-            // Test Algorithm A
             long totalTimeA = 0;
-            long pushA = 0, popA = 0, compA = 0, loopA = 0, dataMovedA = 0;
-
+            long pushA = 0, popA = 0, compA = 0, loopA = 0;
             Runtime runtime = Runtime.getRuntime();
             runtime.gc();
             long memBeforeA = runtime.totalMemory() - runtime.freeMemory();
@@ -41,19 +39,14 @@ public class BenchmarkExperiment {
                     popA = res.getCounter().getPopCount();
                     compA = res.getCounter().getComparisonCount();
                     loopA = res.getCounter().getLoopCount();
-                    dataMovedA = n;
                 }
             }
-
             long memAfterA = runtime.totalMemory() - runtime.freeMemory();
             double estMemA = Math.max(0, (memAfterA - memBeforeA) / 1024.0);
+            System.out.printf(rowFormat, n, "Algorithm A", actualTokens, totalTimeA / runs, pushA, popA, compA, loopA, estMemA);
 
-            System.out.printf(rowFormat, n, "Algorithm A", totalTimeA / runs, pushA, popA, compA, loopA, dataMovedA, estMemA);
-
-            // Test Algorithm B
             long totalTimeB = 0;
-            long pushB = 0, popB = 0, compB = 0, loopB = 0, dataMovedB = 0;
-
+            long pushB = 0, popB = 0, compB = 0, loopB = 0;
             runtime.gc();
             long memBeforeB = runtime.totalMemory() - runtime.freeMemory();
 
@@ -65,25 +58,22 @@ public class BenchmarkExperiment {
                     popB = res.getCounter().getPopCount();
                     compB = res.getCounter().getComparisonCount();
                     loopB = res.getCounter().getLoopCount();
-                    dataMovedB = 0;
                 }
             }
-
             long memAfterB = runtime.totalMemory() - runtime.freeMemory();
             double estMemB = Math.max(0, (memAfterB - memBeforeB) / 1024.0);
-
-            System.out.printf(rowFormat, n, "Algorithm B", totalTimeB / runs, pushB, popB, compB, loopB, dataMovedB, estMemB);
+            System.out.printf(rowFormat, n, "Algorithm B", actualTokens, totalTimeB / runs, pushB, popB, compB, loopB, estMemB);
             System.out.println(lineSeparator);
         }
     }
 
-    // สร้างนิพจน์ที่มีจำนวน Token เท่ากับ n
-    private static String generateExpression(int n) {
+    // n = number of operands; actual token count = 2n - 1 for the generated form.
+    private static String generateExpression(int operandCount) {
         StringBuilder sb = new StringBuilder("1");
         String[] ops = {"+", "-", "*", "/"};
         Random rand = new Random(42);
 
-        for (int i = 1; i < n; i += 2) {
+        for (int i = 1; i < operandCount; i++) {
             sb.append(" ")
               .append(ops[rand.nextInt(ops.length)])
               .append(" ")
