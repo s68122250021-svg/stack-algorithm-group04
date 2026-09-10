@@ -2,6 +2,7 @@ import algorithms.AlgorithmA;
 import algorithms.AlgorithmB;
 import models.ExpressionResult;
 
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Scanner;
@@ -12,48 +13,41 @@ public class Main {
         Scanner scanner = new Scanner(System.in);
         AlgorithmA algorithmA = new AlgorithmA();
         AlgorithmB algorithmB = new AlgorithmB();
-
         boolean running = true;
 
         while (running) {
             printMenu();
             String choice = scanner.nextLine().trim();
-
             switch (choice) {
                 case "1":
                     System.out.print("ป้อนนิพจน์ (Infix): ");
-                    runAlgorithm("Algorithm A", algorithmA.evaluate(scanner.nextLine()));
+                    String expA = scanner.nextLine();
+                    runAlgorithm("Algorithm A", algorithmA.evaluate(expA, readVariablesIfNeeded(expA, scanner)));
                     break;
-
                 case "2":
                     System.out.print("ป้อนนิพจน์ (Infix): ");
-                    runAlgorithm("Algorithm B", algorithmB.evaluate(scanner.nextLine()));
+                    String expB = scanner.nextLine();
+                    runAlgorithm("Algorithm B", algorithmB.evaluate(expB, readVariablesIfNeeded(expB, scanner)));
                     break;
-
                 case "3":
                     System.out.print("ป้อนนิพจน์สำหรับ Trace (Algorithm A): ");
                     algorithmA.traceEvaluate(scanner.nextLine());
                     break;
-
                 case "4":
                     System.out.print("ป้อนนิพจน์สำหรับ Trace (Algorithm B): ");
                     algorithmB.traceEvaluate(scanner.nextLine());
                     break;
-
                 case "5":
                     runMandatoryTests(algorithmA, algorithmB);
                     break;
-
                 case "0":
                     running = false;
                     System.out.println("ออกจากโปรแกรม");
                     break;
-
                 default:
                     System.out.println("กรุณาเลือกเมนูที่ถูกต้อง");
             }
         }
-
         scanner.close();
     }
 
@@ -67,6 +61,31 @@ public class Main {
         System.out.println("5. Run Mandatory Test Cases");
         System.out.println("0. ออกจากโปรแกรม");
         System.out.print("เลือกเมนู: ");
+    }
+
+    private static Map<String, Double> readVariablesIfNeeded(String expression, Scanner scanner) {
+        Map<String, Double> variables = new HashMap<>();
+        boolean hasVariable = false;
+        for (char c : expression.toCharArray()) {
+            if (Character.isLetter(c)) { hasVariable = true; break; }
+        }
+        if (!hasVariable) return variables;
+
+        System.out.println("พบตัวแปร เช่น a + b * c");
+        System.out.print("ใส่ค่าตัวแปร (ตัวอย่าง a=1,b=2,c=3) หรือกด Enter: ");
+        String input = scanner.nextLine().trim();
+        if (input.isEmpty()) return variables;
+        for (String pair : input.split(",")) {
+            String[] parts = pair.trim().split("=");
+            if (parts.length == 2 && parts[0].trim().length() == 1 && Character.isLetter(parts[0].trim().charAt(0))) {
+                try {
+                    variables.put(parts[0].trim(), Double.parseDouble(parts[1].trim()));
+                } catch (NumberFormatException ignored) {
+                    System.out.println("ข้ามค่าตัวแปรที่ไม่ถูกต้อง: " + pair);
+                }
+            }
+        }
+        return variables;
     }
 
     private static void runAlgorithm(String label, ExpressionResult result) {
@@ -92,33 +111,24 @@ public class Main {
         tests.put("10 / (5 - 5)", "ERROR");
         tests.put("   ", "ERROR");
         tests.put("3 + 4 * 2 / (1 - 5)", "1");
-
         System.out.println("\n=== MANDATORY TEST CASES ===");
         System.out.printf("%-32s | %-16s | %-16s%n", "Input", "Algorithm A", "Algorithm B");
         System.out.println("--------------------------------------------------------------------------");
-
         for (Map.Entry<String, String> entry : tests.entrySet()) {
             ExpressionResult a = algorithmA.evaluate(entry.getKey());
             ExpressionResult b = algorithmB.evaluate(entry.getKey());
             String aOut = formatTestResult(a);
             String bOut = formatTestResult(b);
             System.out.printf("%-32s | %-16s | %-16s%n", display(entry.getKey()), aOut, bOut);
-
-            if (!aOut.equals(bOut)) {
-                System.out.println("WARNING: A และ B ให้ผลต่างกันใน Input นี้");
-            }
+            if (!aOut.equals(bOut)) System.out.println("WARNING: A และ B ให้ผลต่างกันใน Input นี้");
         }
     }
 
     private static String formatTestResult(ExpressionResult result) {
         if (!result.isSuccess()) return "ERROR";
-        if (Math.abs(result.getValue() - Math.rint(result.getValue())) < 1e-9) {
-            return String.valueOf((long) Math.rint(result.getValue()));
-        }
+        if (Math.abs(result.getValue() - Math.rint(result.getValue())) < 1e-9) return String.valueOf((long) Math.rint(result.getValue()));
         return String.format("%.6f", result.getValue());
     }
 
-    private static String display(String s) {
-        return s.isEmpty() ? "<empty>" : s.replace("\t", "\\t");
-    }
+    private static String display(String s) { return s.isEmpty() ? "<empty>" : s.replace("\t", "\\t"); }
 }
