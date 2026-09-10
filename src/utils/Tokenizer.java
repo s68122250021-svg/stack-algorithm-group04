@@ -32,13 +32,20 @@ public class Tokenizer {
                 continue;
             }
 
+            // Support single-letter variables such as a, b, c.
+            if (Character.isLetter(c)) {
+                tokens.add(String.valueOf(c));
+                i++;
+                continue;
+            }
+
             if (c == '+' || c == '-' || c == '*' || c == '/' || c == '(' || c == ')') {
                 tokens.add(String.valueOf(c));
                 i++;
                 continue;
             }
 
-            throw new IllegalArgumentException("พบตัวอักษรที่ไม่รองรับ: '" + c + "'");
+            throw new IllegalArgumentException("พบตัวอักษร/สัญลักษณ์ที่ไม่รองรับ: '" + c + "'");
         }
 
         if (tokens.isEmpty()) {
@@ -58,9 +65,9 @@ public class Tokenizer {
         boolean expectOperand = true;
 
         for (String token : tokens) {
-            if (isNumber(token)) {
+            if (isOperand(token)) {
                 if (!expectOperand) {
-                    throw new IllegalArgumentException("รูปแบบนิพจน์ไม่ถูกต้อง: ต้องมี Operator ระหว่างตัวเลข");
+                    throw new IllegalArgumentException("รูปแบบนิพจน์ไม่ถูกต้อง: ต้องมี Operator ระหว่าง Operand");
                 }
                 expectOperand = false;
                 continue;
@@ -68,7 +75,7 @@ public class Tokenizer {
 
             if (token.equals("(")) {
                 if (!expectOperand) {
-                    throw new IllegalArgumentException("รูปแบบนิพจน์ไม่ถูกต้อง: ไม่สามารถใส่ '(' หลังตัวเลขหรือ ')'");
+                    throw new IllegalArgumentException("รูปแบบนิพจน์ไม่ถูกต้อง: ไม่สามารถใส่ '(' หลัง Operand หรือ ')'");
                 }
                 balance++;
                 expectOperand = true;
@@ -117,6 +124,14 @@ public class Tokenizer {
             if (!Character.isDigit(c)) return false;
         }
         return true;
+    }
+
+    public static boolean isVariable(String token) {
+        return token != null && token.length() == 1 && Character.isLetter(token.charAt(0));
+    }
+
+    public static boolean isOperand(String token) {
+        return isNumber(token) || isVariable(token);
     }
 
     public static int priority(String operator) {
