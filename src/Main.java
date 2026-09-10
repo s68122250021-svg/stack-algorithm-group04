@@ -1,14 +1,15 @@
 import algorithms.AlgorithmA;
 import algorithms.AlgorithmB;
 import models.ExpressionResult;
+import models.OperationCounter;
+import utils.Tokenizer;
 
-import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 
 public class Main {
-
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
         AlgorithmA algorithmA = new AlgorithmA();
@@ -21,13 +22,11 @@ public class Main {
             switch (choice) {
                 case "1":
                     System.out.print("ป้อนนิพจน์ (Infix): ");
-                    String expA = scanner.nextLine();
-                    runAlgorithm("Algorithm A", algorithmA.evaluate(expA, readVariablesIfNeeded(expA, scanner)));
+                    runInput("Algorithm A", scanner.nextLine(), algorithmA, algorithmB, true);
                     break;
                 case "2":
                     System.out.print("ป้อนนิพจน์ (Infix): ");
-                    String expB = scanner.nextLine();
-                    runAlgorithm("Algorithm B", algorithmB.evaluate(expB, readVariablesIfNeeded(expB, scanner)));
+                    runInput("Algorithm B", scanner.nextLine(), algorithmA, algorithmB, false);
                     break;
                 case "3":
                     System.out.print("ป้อนนิพจน์สำหรับ Trace (Algorithm A): ");
@@ -63,29 +62,30 @@ public class Main {
         System.out.print("เลือกเมนู: ");
     }
 
-    private static Map<String, Double> readVariablesIfNeeded(String expression, Scanner scanner) {
-        Map<String, Double> variables = new HashMap<>();
-        boolean hasVariable = false;
-        for (char c : expression.toCharArray()) {
-            if (Character.isLetter(c)) { hasVariable = true; break; }
-        }
-        if (!hasVariable) return variables;
+    private static void runInput(String label, String expression, AlgorithmA a, AlgorithmB b, boolean useA) {
+        try {
+            List<String> tokens = Tokenizer.tokenize(expression);
+            boolean hasVariable = tokens.stream().anyMatch(Tokenizer::isVariable);
 
-        System.out.println("พบตัวแปร เช่น a + b * c");
-        System.out.print("ใส่ค่าตัวแปร (ตัวอย่าง a=1,b=2,c=3) หรือกด Enter: ");
-        String input = scanner.nextLine().trim();
-        if (input.isEmpty()) return variables;
-        for (String pair : input.split(",")) {
-            String[] parts = pair.trim().split("=");
-            if (parts.length == 2 && parts[0].trim().length() == 1 && Character.isLetter(parts[0].trim().charAt(0))) {
-                try {
-                    variables.put(parts[0].trim(), Double.parseDouble(parts[1].trim()));
-                } catch (NumberFormatException ignored) {
-                    System.out.println("ข้ามค่าตัวแปรที่ไม่ถูกต้อง: " + pair);
-                }
+            // Symbolic mode: variables are not assigned values. Show postfix directly.
+            if (hasVariable) {
+                OperationCounter counter = new OperationCounter();
+                List<String> postfix = a.infixToPostfix(tokens, counter);
+                String postfixCompact = String.join("", postfix);
+                System.out.println("--- " + label + " ---");
+                System.out.println("Input: " + expression);
+                System.out.println("Postfix: " + postfixCompact);
+                System.out.println("หมายเหตุ: ตัวแปรไม่มีการกำหนดค่า จึงแสดงผลเป็น Postfix เท่านั้น");
+                System.out.println("จำนวน Operation: " + counter);
+                return;
             }
+
+            ExpressionResult result = useA ? a.evaluate(expression) : b.evaluate(expression);
+            runAlgorithm(label, result);
+        } catch (Exception e) {
+            System.out.println("--- " + label + " ---");
+            System.out.println("เกิดข้อผิดพลาด: " + e.getMessage());
         }
-        return variables;
     }
 
     private static void runAlgorithm(String label, ExpressionResult result) {
