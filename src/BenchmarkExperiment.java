@@ -5,6 +5,7 @@ import java.util.Random;
 
 public class BenchmarkExperiment {
 
+    // จุดเริ่มต้นของการทดลองเปรียบเทียบประสิทธิภาพ Algorithm A และ B
     public static void main(String[] args) {
         int[] operandSizes = {100, 1000, 10000, 50000};
         int runs = 5;
@@ -21,6 +22,7 @@ public class BenchmarkExperiment {
             "n operands", "Algorithm", "Actual tokens", "Avg Time (ns)", "Push", "Pop", "Comparisons", "Loop Iter", "Est. Memory(KB)");
         System.out.println(lineSeparator);
 
+        // ทดลองกับขนาดข้อมูลหลายระดับเพื่อดูการเปลี่ยนแปลงของประสิทธิภาพ
         for (int n : operandSizes) {
             String expr = generateExpression(n);
             int actualTokens = 2 * n - 1;
@@ -31,6 +33,7 @@ public class BenchmarkExperiment {
             runtime.gc();
             long memBeforeA = runtime.totalMemory() - runtime.freeMemory();
 
+            // รัน Algorithm A หลายครั้งเพื่อหาเวลาเฉลี่ย
             for (int r = 0; r < runs; r++) {
                 ExpressionResult res = algoA.evaluate(expr);
                 totalTimeA += res.getElapsedTimeNanos();
@@ -50,6 +53,7 @@ public class BenchmarkExperiment {
             runtime.gc();
             long memBeforeB = runtime.totalMemory() - runtime.freeMemory();
 
+            // รัน Algorithm B หลายครั้งเพื่อหาเวลาเฉลี่ยและเก็บจำนวน Operation
             for (int r = 0; r < runs; r++) {
                 ExpressionResult res = algoB.evaluate(expr);
                 totalTimeB += res.getElapsedTimeNanos();
@@ -67,12 +71,14 @@ public class BenchmarkExperiment {
         }
     }
 
-    // n = number of operands; actual token count = 2n - 1 for the generated form.
+    // สร้างนิพจน์ทดสอบตามจำนวน Operand ที่กำหนด
+    // รูปแบบที่สร้างมี Operand n ตัว และ Operator n-1 ตัว
     private static String generateExpression(int operandCount) {
         StringBuilder sb = new StringBuilder("1");
         String[] ops = {"+", "-", "*", "/"};
         Random rand = new Random(42);
 
+        // เพิ่ม Operator และ Operand จนครบจำนวนที่ต้องการ
         for (int i = 1; i < operandCount; i++) {
             sb.append(" ")
               .append(ops[rand.nextInt(ops.length)])
