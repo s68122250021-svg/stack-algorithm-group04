@@ -10,12 +10,14 @@ import java.util.Map;
 import java.util.Scanner;
 
 public class Main {
+    // จุดเริ่มต้นของโปรแกรมและควบคุมเมนูหลัก
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
         AlgorithmA algorithmA = new AlgorithmA();
         AlgorithmB algorithmB = new AlgorithmB();
         boolean running = true;
 
+        // แสดงเมนูและรอรับคำสั่งจากผู้ใช้จนกว่าจะเลือก 0
         while (running) {
             printMenu();
             String choice = scanner.nextLine().trim();
@@ -50,6 +52,7 @@ public class Main {
         scanner.close();
     }
 
+    // แสดงตัวเลือกเมนูทั้งหมดของโปรแกรม
     private static void printMenu() {
         System.out.println();
         System.out.println("Expression Processor");
@@ -62,12 +65,13 @@ public class Main {
         System.out.print("เลือกเมนู: ");
     }
 
+    // รับนิพจน์ ตรวจสอบตัวแปร และเลือก Algorithm ที่ต้องการทำงาน
     private static void runInput(String label, String expression, AlgorithmA a, AlgorithmB b, boolean useA) {
         try {
             List<String> tokens = Tokenizer.tokenize(expression);
             boolean hasVariable = tokens.stream().anyMatch(Tokenizer::isVariable);
 
-            // Symbolic mode: variables are not assigned values. Show postfix directly.
+            // ถ้ามีตัวแปร ให้แปลงเป็น Postfix และแสดงผลโดยยังไม่คำนวณค่า
             if (hasVariable) {
                 OperationCounter counter = new OperationCounter();
                 List<String> postfix = a.infixToPostfix(tokens, counter);
@@ -80,6 +84,7 @@ public class Main {
                 return;
             }
 
+            // เลือก Algorithm A หรือ B แล้วส่งผลลัพธ์ไปแสดงผล
             ExpressionResult result = useA ? a.evaluate(expression) : b.evaluate(expression);
             runAlgorithm(label, result);
         } catch (Exception e) {
@@ -88,6 +93,7 @@ public class Main {
         }
     }
 
+    // แสดงผลลัพธ์ Error เวลา และจำนวน Operation ของ Algorithm
     private static void runAlgorithm(String label, ExpressionResult result) {
         System.out.println("--- " + label + " ---");
         if (result.isSuccess()) {
@@ -100,6 +106,7 @@ public class Main {
         System.out.println("จำนวน Operation: " + result.getCounter());
     }
 
+    // รันชุด Test Case ที่กำหนดไว้และเปรียบเทียบผลของ Algorithm A กับ B
     private static void runMandatoryTests(AlgorithmA algorithmA, AlgorithmB algorithmB) {
         Map<String, String> tests = new LinkedHashMap<>();
         tests.put("3 + 4 * 2", "11");
@@ -114,6 +121,7 @@ public class Main {
         System.out.println("\n=== MANDATORY TEST CASES ===");
         System.out.printf("%-32s | %-16s | %-16s%n", "Input", "Algorithm A", "Algorithm B");
         System.out.println("--------------------------------------------------------------------------");
+        // ประมวลผล Test Case ทุกชุดและตรวจว่าผลของ A กับ B ตรงกันหรือไม่
         for (Map.Entry<String, String> entry : tests.entrySet()) {
             ExpressionResult a = algorithmA.evaluate(entry.getKey());
             ExpressionResult b = algorithmB.evaluate(entry.getKey());
@@ -124,11 +132,13 @@ public class Main {
         }
     }
 
+    // แปลงผลลัพธ์ของ Test Case ให้อยู่ในรูปแบบที่อ่านง่าย
     private static String formatTestResult(ExpressionResult result) {
         if (!result.isSuccess()) return "ERROR";
         if (Math.abs(result.getValue() - Math.rint(result.getValue())) < 1e-9) return String.valueOf((long) Math.rint(result.getValue()));
         return String.format("%.6f", result.getValue());
     }
 
+    // จัดรูปแบบข้อความสำหรับแสดงผล เช่น แทน Tab ด้วย \t
     private static String display(String s) { return s.isEmpty() ? "<empty>" : s.replace("\t", "\\t"); }
 }
